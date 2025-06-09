@@ -1,5 +1,6 @@
 from flask import Flask, request
 from datetime import datetime
+import os
 
 app = Flask(__name__)
 
@@ -14,27 +15,22 @@ def register_metadata():
     if not filename or not created_str or not modified_str:
         return {"valid": False, "reason": "필수 메타데이터 누락"}, 400
 
-    created_time = datetime.fromisoformat(created_str)
-    modified_time = datetime.fromisoformat(modified_str)
+    try:
+        created_time = datetime.fromisoformat(created_str)
+        modified_time = datetime.fromisoformat(modified_str)
+    except ValueError:
+        return {"valid": False, "reason": "시간 형식 오류"}, 400
 
     diff_seconds = abs((modified_time - created_time).total_seconds())
 
     if diff_seconds <= 30:
-        return {"valid": True, "diff_minutes": diff_seconds}, 200
+        return {"valid": True}, 200
     else:
         return {
             "valid": False,
-            "reason": f"파일 수정 시간이 생성 시간보다 {round(diff_seconds)}초 이상 지남",
-            "diff_minutes": diff_seconds
+            "reason": f"{round(diff_seconds)}초 차이",
         }, 200
 
-@app.route('/upload', methods=['POST'])
-def upload_file():
-    file = request.files.get('file')
-    if file:
-        file.save(f"uploads/{file.filename}")
-        return {"status": "uploaded"}, 200
-    return {"error": "파일 없음"}, 400
-
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)
