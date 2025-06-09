@@ -26,7 +26,7 @@ def validate_and_upload(filepath):
     sha256 = calculate_sha256(filepath)
 
     try:
-        res = requests.post("https://cc-coupangr-excelcheckerer.onrender.com", json={
+        res = requests.post("https://cc-coupangr-excelcheckerer.onrender.com/register", json={
             "filename": filename,
             "created_time": created_time.isoformat(),
             "modified_time": modified_time.isoformat(),
@@ -35,15 +35,11 @@ def validate_and_upload(filepath):
 
         result = res.json()
         if not result["valid"]:
-            messagebox.showerror("무결성 실패", f"{result['reason']} (차이: {round(result['diff_minutes'])}분)")
+            messagebox.showerror("무결성 실패", f"{result['reason']} (차이: {round(result['diff_minutes'], 1)}초)")
             return
 
-        with open(filepath, 'rb') as f:
-            upload_res = requests.post("https://cc-coupangr-excelcheckerer.onrender.com", files={'file': (filename, f)})
-        if upload_res.status_code == 200:
-            messagebox.showinfo("성공", "✅ 무결성 통과 및 업로드 완료")
-        else:
-            messagebox.showerror("업로드 실패", "서버 업로드 중 오류 발생")
+        messagebox.showinfo("성공", "✅ 무결성 통과")
+        
     except Exception as e:
         messagebox.showerror("에러", f"서버 통신 실패: {e}")
 
