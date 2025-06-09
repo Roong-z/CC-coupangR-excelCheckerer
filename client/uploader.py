@@ -26,7 +26,7 @@ def validate_and_upload(filepath):
     sha256 = calculate_sha256(filepath)
 
     try:
-        res = requests.post("http://localhost:5000/register", json={
+        res = requests.post("https://cc-coupangr-excelcheckerer.onrender.com", json={
             "filename": filename,
             "created_time": created_time.isoformat(),
             "modified_time": modified_time.isoformat(),
@@ -39,7 +39,7 @@ def validate_and_upload(filepath):
             return
 
         with open(filepath, 'rb') as f:
-            upload_res = requests.post("http://localhost:5000/upload", files={'file': (filename, f)})
+            upload_res = requests.post("https://cc-coupangr-excelcheckerer.onrender.com", files={'file': (filename, f)})
         if upload_res.status_code == 200:
             messagebox.showinfo("성공", "✅ 무결성 통과 및 업로드 완료")
         else:
